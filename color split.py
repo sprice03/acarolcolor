@@ -79,12 +79,12 @@ def visualizeSegs(folder_location, colorspace, colormethod, clusters):
     green = np.sum(colorout == 'green')
     unclear = np.sum(colorout == 'unclear')
     #determine accuracy
-    if directory[-5] == 'b':
+    if 'brown' in directory:
         accuracy = brown/(brown+green)
     else:
         accuracy = green/(brown+green)
 
     print(accuracy, unclear/(i+1))
-    print(directory[-5])
+    print(directory)
 
 visualizeSegs('D:/anole_data/segments/green', 'rgb', 'kmeans', 4)
