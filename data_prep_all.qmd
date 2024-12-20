@@ -1,5 +1,5 @@
 ---
-title: "new_serena_climate_data"
+title: "All Data Prep"
 format: html
 editor: visual
 ---
@@ -13,7 +13,6 @@ Download PRISM dailies as required depending on what years are needed
 
 ```{r}
 
-library(colorEvoHelpers)
 library(prism)
 
 #get_prism_dailys(
@@ -124,7 +123,6 @@ bindPrismData <- function(df, prism_dir, cell_width_km = 250, variable = "tmin",
     library(sf)
     library(rgdal)
     library(prism)
-    library(colorEvoHelpers)
 
     # Set the PRISM download directory
     prism_set_dl_dir(prism_dir)
