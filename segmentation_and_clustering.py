@@ -21,7 +21,6 @@ inferMasks(img_ids=None, gpu=True, skip_existing=True,
            data_folder="C:/path_to_BCC_folder")
 
 # Extract masks from the segments
-clusterExtract(feature_extractor="inceptionv3", cluster_algo="affprop",
-               filter_intersects_sides=False, cluster_params_dict={'preference': -2000},
-               show=True, show_indv=False,
-               print_steps=True, data_folder='C:/path_to_BCC_folder/masks')
+filterExtractSegments(feature_extractor="inceptionv3", 
+                      cluster_params_dict={'algo':"affprop",'preference': -2000},
+                      data_folder='C:/path_to_BCC_folder/masks')
