@@ -1,0 +1,78 @@
+---
+title: "Seasonal Latitude Color GAM"
+format: html
+editor: visual
+---
+
+Visualize the spline interaction GAM
+
+```{r}
+
+library(mgcv)
+library(ggplot2)
+library(dplyr)
+library(sjPlot)
+
+# tensor interaction between continuous weeks and latitude
+gam1 <- gam(colorid ~ te(weeks, latitude.x, bs = c("cc", "tp"), k = 3),
+            family = binomial, data = anoleglm)
+
+# visualize 10th, 50th, 90th percentile of latitude
+lat_vals <- quantile(anoleglm$latitude.x, probs = c(0.1, 0.5, 0.9))
+newdata <- expand.grid(
+    weeks = seq(0, 52, length.out = 200),
+    latitude.x = lat_vals
+)
+
+# get predictions and standard errors
+preds <- predict(gam1, newdata = newdata, type = "link", se.fit = TRUE)
+
+# add to newdata
+newdata <- newdata %>%
+    mutate(
+        fit_link = preds$fit,
+        se_link = preds$se.fit,
+        lower = fit_link - 1.96 * se_link,
+        upper = fit_link + 1.96 * se_link,
+        fit = plogis(fit_link),        # convert from logit to probability
+        lower = plogis(lower),
+        upper = plogis(upper),
+        latitude_group = factor(latitude.x)
+    )
+
+p <- ggplot(newdata, aes(x = weeks, y = fit,
+                    color = latitude_group, fill = latitude_group)) +
+  geom_line(size = 1.2) +
+  geom_ribbon(aes(ymin = lower, ymax = upper),
+              alpha = 0.3, color = NA) +
+  scale_y_continuous(labels = scales::percent_format(),
+                     limits = c(0, 1)) +
+  scale_color_grey(start = 0.6, end = 0.2) +
+  scale_fill_grey(start = 0.6, end = 0.2) +
+  labs(x = "Week of Year",
+       y = "Percent Green Anoles") +
+  theme_grey() +
+  theme(legend.position = "none")
+
+p
+```
+
+Compare to additive and non-spline interaction models
+
+```{r}
+
+# model without latitude 
+gam2 <- gam(colorid ~ s(weeks, bs = "cc", k = 3),
+                    family = binomial, data = anoleglm)
+
+# simple additive model for latitude
+gam3 <- gam(colorid ~ s(weeks, bs = "cc", k = 3) + latitude.x,
+                    family = binomial, data = anoleglm)
+
+
+AIC(gam1)
+AIC(gam2)
+AIC(gam3)
+
+# gam1 is way better 
+```
