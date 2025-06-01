@@ -1,12 +1,12 @@
 ---
-title: "All Data Prep"
+title: "Temperature Data Prep"
 format: html
 editor: visual
 ---
 
 ```{r}
 
-data <- read.csv("D:/GitProjects/acarolcolor/data/data_for_hourly_temperature_prep.csv")
+data <- finaldata
 ```
 
 Download PRISM dailies as required depending on what years are needed
@@ -297,7 +297,7 @@ for (i in seq_len(nrow(data_for_hourly))) {
 data <- hourly_temp_data
 ```
 
-Examine the final data - should be no duplicate ids anymore
+Examine the final data
 
 ```{r}
 
