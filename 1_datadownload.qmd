@@ -1,0 +1,57 @@
+---
+title: "Data download and post-python prep"
+format: html
+editor: visual
+---
+
+```{r}
+library(rinat)
+library(lubridate)
+library(readr)
+library(dplyr)
+library(tidyr)
+library(anytime)
+```
+
+Get observations from iNaturalist for each county using its place_ID. These can be found at the end of the URL when searching that county. Alternatively, there is a csv with all place_IDs that you can find here: <https://www.inaturalist.org/pages/developers>
+
+```{r}
+
+#run for each county you want data from
+
+resultscounty = get_inat_obs(
+  taxon_name = "Anolis carolinensis",
+  place_id = ####,
+  quality = "research",
+  maxresults = 10000
+)
+
+# write.csv(resultscounty, "E://a_carol_data/county/county_list.csv")
+
+```
+
+Before continuing, make a bigcrittercolor folder for each county in Python. Then, download images to the all_images subfolder.
+
+```{r}
+
+resultscounty <- read.csv("data/county_list.csv")
+download_images <- function(dat,size="medium",outpath="E://a_carol_data/county/all_images/"){
+  for (i in 1:dim(dat)[1]){
+    iurl <- dat$image_url[i]
+    iurl <- gsub("medium",size,iurl)
+    iname <- paste(outpath,dat$id[i]," ",dat$scientific_name[i]," ",dat$observed_on[i],".jpg",sep="")
+    print(iname)
+    tryCatch(
+      {download.file(iurl,iname, mode = 'wb')},
+      error = function(err) {print(paste("MY_ERROR:  ",err))}
+    )
+    Sys.sleep(2)
+  }
+}
+
+#run function for each county, may take a while for large counties
+download_images(resultscounty, outpath="E://a_carol_data/county/all_images")
+
+```
+
+From here, you can proceed with the computer vision pipeline in Python in the file "segmentation_and_clustering.py". Once that is completed, you should get a csv file for each county that will be combined in "postpythonprep.qmd"

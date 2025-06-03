@@ -1,0 +1,104 @@
+---
+title: "season_temp_color_glm"
+format: html
+editor: visual
+---
+
+Read in data we created
+
+```{r}
+
+library(ggplot2)
+
+anoleglm <- read.csv("data/anoleglm.csv")
+```
+
+One model version
+
+```{r}
+
+library(ggplot2)
+library(scales)
+library(dplyr)
+
+# Ensure factors and correct levels
+anoleglm <- anoleglm %>%
+  mutate(
+    color = factor(color, levels = c("brown", "green")),
+    Season = factor(Season, levels = c("summer only", "summer excluded"))
+  )
+
+# Fit one model with interaction between temperature and season
+model <- glm(
+  formula = color ~ hour_temperature * Season,
+  data    = anoleglm,
+  family  = binomial
+)
+
+# Build new data for prediction
+# For each Season, predict across the observed range of temperatures in that season
+newdata <- bind_rows(lapply(levels(anoleglm$Season), function(seas) {
+  df_sub <- filter(anoleglm, Season == seas)
+  
+  temp_seq <- seq(
+    from = min(df_sub$hour_temperature, na.rm = TRUE),
+    to   = max(df_sub$hour_temperature, na.rm = TRUE),
+    length.out = 100
+  )
+  
+  data.frame(
+    Season = factor(seas, levels = levels(anoleglm$Season)),
+    hour_temperature = temp_seq
+  )
+}))
+
+# Predict on the logit scale and back-transform to probabilities
+preds <- predict(model, newdata = newdata, type = "link", se.fit = TRUE)
+
+# Combine predictions with newdata
+pred_df <- newdata %>%
+  mutate(
+    fit_link = preds$fit,
+    se_link = preds$se.fit,
+    lower = plogis(fit_link - 1.96 * se_link),
+    upper = plogis(fit_link + 1.96 * se_link),
+    fit = plogis(fit_link)
+  )
+
+# Plot
+ggplot(pred_df,
+       aes(x = hour_temperature,
+           y = fit,
+           color = Season,
+           fill  = Season)) +
+  geom_ribbon(aes(ymin = lower, ymax = upper),
+              alpha = 0.2,
+              color = NA) +
+  geom_line(size = 1) +
+  xlab("Temperature (°C)") +
+  ylab("Percent Anoles /w Green Morph”") +
+  scale_y_continuous(
+    labels = percent_format(accuracy = 1),
+    limits = c(0, 1),
+    breaks = seq(0, 1, 0.25)
+  ) +
+  scale_x_continuous(breaks = seq(0, 45, 10)) +
+  scale_color_manual(values = c(
+    "summer only"     = "#FF6666",
+    "summer excluded" = "#55868C"
+  )) +
+  scale_fill_manual(values = c(
+    "summer only"     = "#FF6666",
+    "summer excluded" = "#55868C"
+  )) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+```
+
+Look at diagnostics and summary stats to liking
+
+```{r}
+
+summary(model)
+```

@@ -1,0 +1,36 @@
+---
+title: "3_postpythonprep"
+format: html
+editor: visual
+---
+
+"segmentation_and_clustering.py" produces a csv file for each county. Import that and merge with original results to add metadata to color output results.
+
+```{r}
+
+#merge data with color output from pipeline for each county
+county_colorout <- merge(county_list, county_colorout, by = 'id', all.y = TRUE )
+county_colorout$county <- "county"
+```
+
+Merge all counties you obtained data for to create a final data set, then add the necessary information for temperature analysis and modeling.
+
+```{r}
+
+#merge all counties for a final, labeled data set
+finaldata <- rbind(travis_colorout, richland_colorout, fulton_colorout, harris_colorout, hillsborough_colorout, 
+                   alachua_colorout, horry_colorout, jefferson_colorout, leon_colorout, mecklenburg_colorout,
+                   miamidade_colorout, newhanover_colorout, nueces_colorout, orange_colorout, orleans_colorout,
+                   dallas_colorout, chatham_colorout, wake_colorout, bexar_colorout, broward_colorout)
+
+#add time information based on observation date
+finaldata$weeks <- week(ymd(finaldatat$observed_on))
+finaldata$yday <- yday(finaldata$observed_on)
+finaldata$year <- year(finaldata$observed_on)
+
+#create binary color ID
+finaldata <- finaldata %>%
+  mutate(colorid = if_else(color == "green", 1, 0))
+```
+
+From here, you are ready to obtain temperature data for each observation
