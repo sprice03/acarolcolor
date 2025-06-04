@@ -1,0 +1,36 @@
+---
+title: "Testing for background matching"
+format: html
+editor: visual
+---
+
+Import the csv files from the python green index test and merge
+
+```{r}
+
+#import tests and rename cols for clarity
+segments_index <- read.csv("D:/anole_data/segments/segments_greenindex.csv")
+colnames(segment_index)[2] <- 'segment_index'
+bg_index <- read.csv("D:/anole_data/edges/edges_greenindex.csv")
+colnames(edges_index)[2] <- 'edge_index'
+
+#merge
+index_data <- merge(segments_index, bg_index, by="id")
+
+```
+
+run a linear model to test for background matching
+
+```{r}
+library(sjPlot)
+
+bgmodel <- glm(edge_index ~ segment_index, data = index_data)
+
+plot_model(bgmodel, type = "pred",  terms = c("segment_index"), title = "Evaluating Background Matching with Green Index Comparison", axis.title = c("Background Green Index","Segment Green Index")))
+```
+
+Look at diagnostics and summary stats to liking
+
+```{r}
+summary(bgmodel)
+```
