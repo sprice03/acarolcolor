@@ -9,8 +9,13 @@ Read in data we created
 ```{r}
 
 library(ggplot2)
+library(dplyr)
 
-anoleglm <- read.csv("data/anoleglm.csv")
+#anoleglm <- read.csv("data/anoleglm.csv")
+anoleglm <- read.csv("data/highresanole.csv")
+anoleglm$Season <-  recode(anoleglm$season,
+                         "Breeding season" = "summer only",
+                         "Non-Breeding season" = "summer excluded")
 ```
 
 One model version
@@ -101,4 +106,33 @@ Look at diagnostics and summary stats to liking
 ```{r}
 
 summary(model)
+```
+
+```{r}
+
+# Fit one model with interaction between temperature and season
+model2 <- glm(
+  formula = color ~ hour_temperature,
+  data    = anoleglm,
+  family  = binomial
+)
+
+model3 <- glm(
+  formula = color ~ hour_temperature + Season,
+  data    = anoleglm,
+  family  = binomial
+)
+
+summary(model)
+AIC(model)
+AIC(model2)
+AIC(model3)
+15437 - 15287
+1 - (model$deviance / model$null.deviance)
+
+#library(pROC)
+#pred <- predict(model, type = "response")
+#roc_obj <- roc(anoleglm$color, pred)
+#plot(roc_obj)
+#auc(roc_obj)
 ```

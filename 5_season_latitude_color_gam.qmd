@@ -9,8 +9,11 @@ Read in data we created
 ```{r}
 
 library(ggplot2)
+library(lubridate)
 
-anoleglm <- read.csv("data/anoleglm.csv")
+anoleglm <- read.csv("data/highresanole.csv")
+anoleglm$weeks <- week(ymd(anoleglm$observed_on))
+anoleglm$latitude.x <- anoleglm$Latitude
 ```
 
 Visualize the spline interaction GAM
@@ -82,6 +85,14 @@ gam3 <- gam(colorid ~ s(weeks, bs = "cc", k = 3) + latitude.x,
 AIC(gam1)
 AIC(gam2)
 AIC(gam3)
+
+summary(gam1)
+summary(gam1)$dev.expl
+
+#library(pROC)
+#pred <- predict(gam1, type = "response")
+#roc_obj <- roc(anoleglm$colorid, pred)
+#auc(roc_obj)  # closer to 1 = better
 
 # gam1 is way better 
 ```
