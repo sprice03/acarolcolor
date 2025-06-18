@@ -13,15 +13,17 @@ np.set_printoptions(threshold=sys.maxsize)
 
 def getcontour(folder_location):
     directory = folder_location
+    filenames = []
+    print(directory)
     i = 0
-    for filename in glob.glob(directory + 'masks/*.png'):
+    for filename in glob.glob(directory + '/masks/*.png'):
         with open(filename):
-            image = cv2.imread(filename)
             mask = cv2.imread(filename)
             ids = filename.split('/')
             ids = ids[2].split('\\')
             filebase = ids.replace("_mask", "")
             filebase = filebase.replace(".png", ".jpg")
+            image = cv2.imread(filebase)
             ids = ids[1].split(' ')
             ids = ids[0]
             gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -41,10 +43,10 @@ def getcontour(folder_location):
 def greenindex(folder_location, colorspace, colormethod, clusters):
     directory = folder_location
     results = np.empty(3, int)
-    colorout = np.array(['id', 'color'])
     filenames = []
     location = folder_location.split("/")
-    location = location[2]
+    location = location[3]
+    colorout = np.array(['id', location + '_color'])
     i = 0
     for filename in glob.glob(directory + '/*.png'):
         with open(filename):
@@ -92,6 +94,6 @@ def greenindex(folder_location, colorspace, colormethod, clusters):
     df.to_csv(folder_location + "/" + location + "_" + "greenindex.csv", header=False, index=False)
 
 
-getcontour('D:anole_data/segments')
-greenindex('D:anole_data/segments', 'rgb', 'kmeans', 4)
-greenindex('D:/anole_data/edges', 'rgb', 'kmeans', 4)
+getcontour('F:/a_carol_data/alachua_gainesville')
+greenindex('F:/a_carol_data/alachua_gainesville/segments', 'rgb', 'kmeans', 4)
+greenindex('F:/a_carol_data/alachua_gainesville/edges', 'rgb', 'kmeans', 4)
