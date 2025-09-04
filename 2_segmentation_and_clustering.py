@@ -16,7 +16,7 @@ createBCCDataFolder("C:/a_carol_data", "county_name")
 
 # Infer the masks of the images
 inferMasks(img_ids=None, gpu=True, skip_existing=True,
-           text_prompt="animal", erode_kernel_size=0, remove_islands=True,
+           text_prompt="subject", erode_kernel_size=0, remove_islands=True,
            show_indv=False, print_steps=True, print_details=True,
            data_folder="C:/path_to_BCC_folder")
 
